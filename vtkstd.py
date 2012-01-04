@@ -67,6 +67,11 @@ def main():
                       help='verbose output')
 
   args = parser.parse_args()
+
+  #make sure args is an empty list instead of none
+  if (args.ignore is None):
+    args.ignore = []
+
   for dirPath in dirwalk(args.directory,args.recurse,args.ignore):
     cleanDirectory(dirPath,args.verbose)
 
