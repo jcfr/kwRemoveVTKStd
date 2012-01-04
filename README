@@ -1,1 +1,12 @@
 Basic script to remove the usage of vtkstd namespace from a project.
+
+How to use:
+
+./vtkstd.py -d ParaView/src/ -i VTK -R -v
+
+Arguments:
+  -d --directory the root directory to start from
+  -i --ignore directory names you don't want cleaned
+  -R --recurse if you want to recurse from the root directory
+  -v --verbose if you want verbose output
+
