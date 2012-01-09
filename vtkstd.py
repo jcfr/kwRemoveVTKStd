@@ -1,10 +1,30 @@
 #!/usr/bin/env python
 import fileinput, glob, string, sys, os, re, argparse
 
-# Build up a list of all export macros to replace.
-pattern = re.compile("#include <vtkstd/")
-patterna = re.compile("#include \"vtkstd/")
-pattern2 = re.compile("vtkstd::")
+# Build up a list of all vtkstd strings to replace.
+patterns = [re.compile("#include <vtkstd/"),\
+            re.compile("#include \"vtkstd/"),\
+            re.compile("vtkstd::"), \
+            re.compile("using namespace vtkstd;")]
+
+# Build up a list of all replacement strings
+replacements = ["#include <", "#include \"", "std::", "using namespace std;"]
+
+
+#parse the file and replace all occurances of vtkstd with std
+def replaceFile(fname):
+  replacedLine = False
+  for line in fileinput.input(fname, inplace=1):
+    for pattern,replacement in zip(patterns,replacements):
+      lineNumber = pattern.search(line)
+      if lineNumber >= 0:
+        line = pattern.sub(replacement, line)
+        #remove any trailing whitespace at the same time and add back in the
+        #new line character
+        line = line.rstrip() + "\n"
+        replacedLine = True
+    sys.stdout.write(line)
+  return replacedLine
 
 def dirwalk(dirPath,recurse,ignore):
   "walk a directory tree, using a generator"
@@ -29,25 +49,10 @@ def cleanDirectory(dirPath,verbose):
     if(os.path.isfile(fullpath) and\
        not os.path.islink(fullpath) and\
        not f.startswith('.')):
-      if(verbose):
-        print "cleaning: ", f
-      replaceFile(fullpath)
+      replaced = replaceFile(fullpath)
+      if(verbose and replaced):
+        print "removed vtkstd from: ", f
 
-def replaceFile(fname):
-  for line in fileinput.input(fname, inplace=1):
-    lineNumber = pattern.search(line)
-    if lineNumber >= 0:
-      line = pattern.sub("#include <", line)
-      line = line.rstrip() + "\n"
-    lineNumber = patterna.search(line)
-    if lineNumber >= 0:
-      line = patterna.sub("#include \"", line)
-      line = line.rstrip() + "\n"
-    lineNumber = pattern2.search(line)
-    if lineNumber >= 0:
-      line = pattern2.sub("std::", line)
-      line = line.rstrip() + "\n"
-    sys.stdout.write(line)
 
 
 def main():
@@ -58,7 +63,6 @@ def main():
   parser.add_argument('-i', '--ignore',
                       nargs='+',
                       help='directory to ignore when recursing')
-
   parser.add_argument('-R', '--recurse',
                       action='store_true',
                       help='recurse the root directory')
