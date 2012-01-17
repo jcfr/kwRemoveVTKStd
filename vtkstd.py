@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+
+#  This software is distributed WITHOUT ANY WARRANTY; without even
+#  the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+#  PURPOSE.  See the above copyright notice for more information.
+
 import fileinput, glob, string, sys, os, re, argparse
 
 # Build up a list of all vtkstd strings to replace.
@@ -21,8 +26,8 @@ def replaceFile(fname):
         line = pattern.sub(replacement, line)
         #remove any trailing whitespace at the same time and add back in the
         #new line character
-        line = line.rstrip() + "\n"
         replacedLine = True
+    line = line.rstrip() + "\n"
     sys.stdout.write(line)
   return replacedLine
 
